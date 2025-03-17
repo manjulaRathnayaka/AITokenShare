@@ -1,0 +1,164 @@
+openapi: 3.0.1
+info:
+  title: OpenAI Key Manager
+  description: Service to get and set OpenAI API keys
+  version: 1.0.0
+servers:
+  - url: /
+paths:
+  /key:
+    get:
+      summary: Get the stored OpenAI API key
+      responses:
+        '200':
+          description: The API key was found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KeyResponse'
+        '404':
+          description: API key not set
+    post:
+      summary: Set a new OpenAI API key
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/KeyRequest'
+      responses:
+        '200':
+          description: API key updated successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: API key updated successfully
+                  disclaimer:
+                    type: string
+                    example: This key is only for demo purposes
+        '400':
+          description: Invalid request body or API key is empty
+        '500':
+          description: Failed to save API key
+  /health:
+    get:
+      summary: Health check endpoint
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            text/plain:
+              schema:
+                type: string
+                example: OK
+components:
+  schemas:
+    KeyRequest:
+      type: object
+      properties:
+        api_key:
+          type: string
+          description: The OpenAI API key
+      required:
+        - api_key
+    KeyResponse:
+      type: object
+      properties:
+        api_key:
+          type: string
+          description: The OpenAI API key
+        disclaimer:
+          type: string
+          description: Disclaimer about key usage
+          example: This key is only for demo purposes
+    Bill:
+      type: object
+      properties:
+        id:
+          type: integer
+        merchant_name:
+          type: string
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+        notes:
+          type: string
+        raw_text:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+
+    CreateBillRequest:
+      type: object
+      required:
+        - merchant_name
+        - amount
+        - date
+        - category
+      properties:
+        merchant_name:
+          type: string
+        amount:
+          type: number
+          format: float
+        date:
+          type: string
+          format: date
+        category:
+          type: string
+        notes:
+          type: string
+        raw_text:
+          type: string
+
+    BillProcessResult:
+      type: object
+      properties:
+        raw_text:
+          type: string
+          description: Full extracted text from the image
+        merchant_name:
+          type: string
+          description: Extracted merchant name
+        amount:
+          type: string
+          description: Extracted bill amount
+        date:
+          type: string
+          description: Extracted bill date
+        category:
+          type: string
+          description: Predicted expense category
+        confidence:
+          type: object
+          description: Confidence scores for each extracted field
+          properties:
+            merchant:
+              type: number
+              format: float
+              description: Confidence in merchant name extraction (0-1)
+            amount:
+              type: number
+              format: float
+              description: Confidence in amount extraction (0-1)
+            date:
+              type: number
+              format: float
+              description: Confidence in date extraction (0-1)
+            category:
+              type: number
+              format: float
+              description: Confidence in category prediction (0-1)
+        image_type:
+          type: string
+          description: Content type of the uploaded image
